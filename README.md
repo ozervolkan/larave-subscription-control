@@ -45,6 +45,7 @@ Bu işlemlerden sonra aşağıdaki url den yayına geçecektir.
 ```
 http://127.0.0.1:8000
 ```
+
 ## Job 
 
 Joblar için database kullanıldı. 
@@ -53,4 +54,7 @@ Joblar için database kullanıldı.
   php artisan dispatch:RenewSubs
   php artisan queue:work
 ```
+## Postman
+
+Postman Koleksiyonu ana dizine eklenmiştir.
     
