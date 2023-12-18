@@ -27,7 +27,6 @@ class RenewSubs extends Command
      */
     public function handle()
     {
-      //  dispatch(new RenewSubs());
         RenewSubsJobs::dispatch();
         $this->info('Abonelikler yenilenmek için hazır. php artisan queue:work komutunu çalıştırabilirsiniz.');
     }
