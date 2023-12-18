@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\JsonResponseHelper;
+use App\Repositories\UserRepository;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Http\Response;
@@ -9,7 +12,18 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function  register(Request $request)
+    private $token_name = "mukellefcase";
+
+    public function __construct(private UserRepository $userRepository)
+    {
+
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function  register(Request $request): JsonResponse
     {
         $fields = $request->validate([
             'name'=> 'required|string',
@@ -17,44 +31,42 @@ class AuthController extends Controller
             'password'=> 'required|string|confirmed'
         ]);
 
-        $user = User::create([
-            'name'=> $fields['name'],
-            'email'=> $fields['email'],
-            'password'=> bcrypt($fields['password'])
-        ]);
+        $user = $this->userRepository->create($fields);
 
-        $token = $user->createToken('mukellefcasetoken')->plainTextToken;
+        $token = $user->createToken($this->token_name)->plainTextToken;
 
         $response = [
             'user'=> $user,
             'token'=> $token
         ];
 
-        return response($response, 201);
+        return JsonResponseHelper::success($response, "Kayıt işlemi başarılı oldu.", 201);
     }
 
-    public function login(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse|Response
+     */
+    public function login(Request $request): JsonResponse
     {
         $fields = $request->validate([
             'email'=> 'required|string',
             'password'=> 'required|string'
         ]);
 
-        $user = User::where('email', $fields['email'])->first();
+        $user = $this->userRepository->show($fields);
 
         if(!$user || !Hash::check($fields['password'], $user->password) ){
-            return response([
-                'message'=> 'Kullanıcı adı yada şifre yanlış. '
-            ], 401);
+            return JsonResponseHelper::error("Kullanıcı adı yada şifre yanlış.", 401);
         }
 
-        $token = $user->createToken('mukellefcasetoken')->plainTextToken;
+        $token = $user->createToken($this->token_name)->plainTextToken;
 
         $response = [
             'user'=> $user,
             'token'=> $token
         ];
 
-        return response($response, 201);
+        return JsonResponseHelper::success($response, "Başarıyla giriş yaptınız.", 201);
     }
 }
